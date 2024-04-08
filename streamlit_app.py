@@ -4,7 +4,7 @@ import pandas as pd
 from streamlit_folium import folium_static
 from folium.plugins import MarkerCluster
 from geopy.distance import geodesic
-from streamlit-geolocation import streamlit_geolocation
+from streamlit_geolocation import streamlit_geolocation
 
 yellow_pages = pd.read_csv('yellow_pages_pharmacy_df.csv') 
 
