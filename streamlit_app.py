@@ -56,8 +56,6 @@ def main():
     user_location = get_user_location()
     if user_location:
         try:
-            latitude, longitude = map(float, user_location.split(','))
-            user_location = (latitude, longitude)
             nearest_pharmacies = find_nearest_pharmacies(user_location, yellow_pages, top_n=10)
             if nearest_pharmacies:
                 # Create a Folium map
