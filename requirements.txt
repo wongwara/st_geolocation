@@ -1,0 +1,9 @@
+pip==24.0
+streamlit>=1.32.2
+geopy==2.2.0
+requests==2.31.0
+folium
+streamlit_folium
+requests
+
+streamlit-geolocation
