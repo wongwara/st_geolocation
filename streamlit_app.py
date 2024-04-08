@@ -24,10 +24,18 @@ def get_user_location():
     if st.button("Get Location"):
         location = streamlit_geolocation()
         st.write(location)
-        if 'latitude' in location and 'longitude' in location:
-            latitude = float(location['latitude'])
-            longitude = float(location['longitude'])
-            return latitude, longitude
+        latitude = location.get('latitude')
+        longitude = location.get('longitude')
+        if latitude is not None and longitude is not None:
+            try:
+                latitude = float(latitude)
+                longitude = float(longitude)
+                return latitude, longitude
+            except ValueError:
+                st.error("Latitude or longitude value is not a valid number.")
+        else:
+            st.error("Latitude or longitude value is missing.")
+
     
 def find_nearest_pharmacies(user_location, pharmacies, top_n=10):
     nearest_pharmacies = []
