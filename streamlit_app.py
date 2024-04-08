@@ -24,10 +24,10 @@ def get_user_location():
     if st.button("Get Location"):
         location = streamlit_geolocation()
         st.write(location)
-        if 'outputs' in location and 'latitude' in location['outputs'] and 'longitude' in location['outputs']:
-                latitude = float(location['location']['latitude'])
-                longitude = float(location['location']['longitude'])
-                return latitude, longitude     
+        if 'latitude' in location and 'longitude' in location:
+            latitude = float(location['latitude'])
+            longitude = float(location['longitude'])
+            return latitude, longitude
     
 def find_nearest_pharmacies(user_location, pharmacies, top_n=10):
     nearest_pharmacies = []
