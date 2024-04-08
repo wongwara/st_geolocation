@@ -18,6 +18,15 @@ st.title('Oversea Student Healthcare Find Nearest Pharmacies')
 st.markdown('Welcome to New South Wales Nearest Pharmacies finding!, We will need you to provide your current latitude and longitude.')
 st.markdown('Once you provide the latitude and longitude, we will find the nearest pharmacies for you. You can find your current location from [here](https://www.gps-coordinates.net/my-location)')
 
+st.title("Streamlit Geolocation")
+
+try:
+    loc_string = streamlit_geolocation()
+except:
+    print("error")
+
+if loc_string is not None:
+    st.write(f"{loc_string}")
 
 def get_user_location():
     st.text("Hello")
