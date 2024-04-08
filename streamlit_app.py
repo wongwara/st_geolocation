@@ -8,9 +8,6 @@ from streamlit_geolocation import streamlit_geolocation
 
 yellow_pages = pd.read_csv('yellow_pages_pharmacy_df.csv') 
 
-# Initialize chat history
-chat_history = []
-
 # page setup
 st.set_page_config(
     page_title="Oversea Student Healthcare Find Nearest Pharmacies",
@@ -25,10 +22,12 @@ st.markdown('Once you provide the latitude and longitude, we will find the neare
 def get_user_location():
     st.text("Hello")
     if st.button("Get Location"):
-        latitude = streamlit_geolocation['latitude']
-        longitude = streamlit_geolocation['longitude']
-        location = f"{latitude}, {longitude}"
-        return location     
+        location = streamlit_geolocation()
+        st.write(location)
+        if 'outputs' in location and 'latitude' in location['outputs'] and 'longitude' in location['outputs']:
+                latitude = float(location['location']['latitude'])
+                longitude = float(location['location']['longitude'])
+                return latitude, longitude     
     
 def find_nearest_pharmacies(user_location, pharmacies, top_n=10):
     nearest_pharmacies = []
@@ -53,7 +52,7 @@ def find_nearest_pharmacies(user_location, pharmacies, top_n=10):
     
     return nearest_pharmacies
 
-def chat():
+def main():
     user_location = get_user_location()
     if user_location:
         try:
@@ -95,4 +94,4 @@ def chat():
             st.error("Invalid input format. Please provide latitude and longitude in the format 'latitude, longitude'.")
 
 if __name__ == "__main__":
-    chat()
+    main()
