@@ -118,10 +118,10 @@ def main():
             # Store user message
             st.session_state.messages.append({
                 "role": "user",
-                "content": f"I'd like to know about pharmacies near this address: {user_input}",
+                "content": f"I'd like to know about pharmacies near this address: {address}",
             })
              # Get the user's location from the address
-            user_latitude, user_longitude = get_user_location(user_input)
+            user_latitude, user_longitude = get_user_location(address)
 
             if user_latitude and user_longitude:
                 user_location = (user_latitude, user_longitude)
