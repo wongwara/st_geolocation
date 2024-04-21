@@ -123,7 +123,7 @@ def main():
             elif st.session_state.menu_choice == 'Pharmacy Location':
                 st.write('Pharmacy Location')
                 user_location = None
-                response = "Please enter your location (address or postal code):"
+                response = "Please enter your location (address):"
                 if user_input:
                     latitude, longitude = get_user_location(user_input)
                     if latitude is not None and longitude is not None:
