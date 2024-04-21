@@ -7,3 +7,4 @@ streamlit_folium
 requests
 streamlit-geolocation
 geopy
+streamlit_chat
