@@ -125,22 +125,21 @@ def main():
                 st.session_state.clear()
                 st.experimental_rerun()  # Restart the chat flow
             else:
-                # Handle Pharmacy Location logic
                 if st.session_state.menu_choice == 'Pharmacy Location':
-                    user_location = get_user_location(user_input)
-    
-                    # Check if user location was successfully retrieved
-                    if user_location[0] is not None and user_location[1] is not None:
-                        nearest_pharmacies = find_nearest_pharmacies(user_location, yellow_pages)
-                        create_pharmacy_map(user_location, nearest_pharmacies)
+                    latitude, longitude = get_user_location(user_input)  # Get lat/lon from the address
 
-                    # Generate a response listing nearest pharmacies
+                # Check if the location was successfully retrieved
+                if latitude is not None and longitude is not None:
+                    user_location = (latitude, longitude)  # Tuple of latitude and longitude
+                    nearest_pharmacies = find_nearest_pharmacies(user_location, yellow_pages)
+                    create_pharmacy_map(user_location, nearest_pharmacies)  # Display map with pharmacies
+                    
                     response = "Here are the nearest pharmacies:"
                     for i, (pharmacy, distance) in enumerate(nearest_pharmacies, 1):
                         response += f"\n{i}. {pharmacy['pharmacy_name']} - Distance: {distance:.2f} km"
                 else:
-                    # Error message if location cannot be found
-                    response = "Sorry, I could not find your location. Please provide a valid address."
+                    response = "Sorry, I could not find your location. Please try again!"
+
         else:
             response = f"{st.session_state.menu_choice} chosen" 
 
