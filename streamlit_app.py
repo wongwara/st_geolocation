@@ -8,13 +8,13 @@ from streamlit_folium import folium_static
 from streamlit_chat import message  # For chatbot-like interaction
 
 # Load your pharmacy data
-yellow_pages = pd.read_csv('yellow_pages_pharmacy_df.csv')
+yellow_pages = pd.read_csv("yellow_pages_pharmacy_df.csv")
 
 # Initialize chat history if not already present
 if "messages" not in st.session_state:
     st.session_state.messages = []  # List of chat messages
-    
-# Define function to get user latitude and longitude from an address
+
+# Define a function to get user latitude and longitude from an address
 def get_user_location(address):
     geolocator = Nominatim(user_agent="geo_locator")
     location = geolocator.geocode(address)
@@ -22,14 +22,14 @@ def get_user_location(address):
         return location.latitude, location.longitude  # Return lat/long
     else:
         return None, None
-    
-# Define function to find the nearest pharmacies based on user location
+
+# Define a function to find the nearest pharmacies based on user location
 def find_nearest_pharmacies(user_location, pharmacies, top_n=10):
     distances = []
     for _, pharmacy in pharmacies.iterrows():
         try:
-            latitude = float(pharmacy['latitude'])
-            longitude = float(pharmacy['longitude'])
+            latitude = float(pharmacy["latitude"])
+            longitude = float(pharmacy["longitude"])
             pharmacy_location = (latitude, longitude)
             distance = geodesic(user_location, pharmacy_location).kilometers
             distances.append((pharmacy, distance))
@@ -40,7 +40,7 @@ def find_nearest_pharmacies(user_location, pharmacies, top_n=10):
     sorted_distances = sorted(distances, key=lambda x: x[1])
     return sorted_distances[:top_n]
 
-# Define function to create a Folium map with nearest pharmacies
+# Define a function to create a Folium map with nearest pharmacies
 def create_pharmacy_map(user_location, nearest_pharmacies):
     m = folium.Map(location=user_location, zoom_start=14)
     marker_cluster = MarkerCluster().add_to(m)
@@ -50,87 +50,107 @@ def create_pharmacy_map(user_location, nearest_pharmacies):
         location=user_location,
         popup="Your Location",
         icon=folium.Icon(color="green"),
-    ).add_to(marker_cluster)
+    ).add_to(m)
 
     # Add markers for the nearest pharmacies
     for pharmacy, distance in nearest_pharmacies:
         popup_text = f"{pharmacy['pharmacy_name']} - Distance: {distance:.2f} km"
         folium.Marker(
-            location=(pharmacy['latitude'], pharmacy['longitude']),
+            location=(pharmacy["latitude"], pharmacy["longitude"]),
             icon=folium.Icon(color="blue"),
         ).add_to(marker_cluster)
 
     return m
 
-# Create a simple chatbot interaction
-st.title("Pharmacy Finder Chatbot")
+def main():
+    # Set the title for your app
+    st.title("Streamlit Chat")
 
-# Display previous chat messages
-for msg in st.session_state.messages:
-    if msg["type"] == "user":
-        with st.chat_message("user"):
-            st.write(msg["content"])  # Display user message
-    elif msg["type"] == "assistant":
-        with st.chat_message("assistant"):
-            st.write(msg["content"])  # Display bot message
+    # Set a greeting message for the initial interaction
+    greeting = "Hi, how can I help you? Choose from menu items: Diagnosis, OSHC, or Pharmacy Location."
 
-# User input for new message
-user_input = st.text_input("You: ", key="user_input")  # Text input for user response
+    # Initialize chat history
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
 
-if st.button("Send"):  # Button to send the user message
-    if user_input:  # If user has entered text
-        # Store user message
-        st.session_state.messages.append({
-            "type": "user",
-            "content": user_input
-        })
+    # Initialize menu choice and show/hide logic
+    if "menu_choice" not in st.session_state:
+        st.session_state.menu_choice = None
 
-        # Get the user's location from the address
-        user_latitude, user_longitude = get_user_location(user_input)
-        if user_latitude and user_longitude:
-            user_location = (user_latitude, user_longitude)
+    if "showSelect" not in st.session_state:
+        st.session_state.showSelect = False
 
-            # Find the nearest pharmacies
-            nearest_pharmacies = find_nearest_pharmacies(user_location, yellow_pages, top_n=10)
+    # Display the initial message from the assistant
+    with st.chat_message("assistant"):
+        st.markdown(greeting)
 
-            # Display response and map
-            if nearest_pharmacies:
-                # Add chatbot response
-                st.session_state.messages.append({
-                    "type": "assistant",
-                    "content": "Here's the map with the nearest pharmacies and their distances."
-                })
+    # Display chat history
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-                # Create the map and display it
-                map_object = create_pharmacy_map(user_location, nearest_pharmacies)
-                folium_static(map_object)
+    # Display a select box for the user to choose a menu option
+    menu_option = st.selectbox(
+        "Choose an option:",
+        ["Select", "Diagnosis", "OSHC", "Pharmacy Location"],
+        key="menu_option",
+    )
 
-                # Display the top 10 nearest pharmacies in a table
-                nearest_pharmacies_df = pd.DataFrame(
-                    [(pharmacy['pharmacy_name'], f"{distance:.2f} km") for pharmacy, distance in nearest_pharmacies],
-                    columns=['Pharmacy Name', 'Distance (km)']
-                )
-                st.subheader("Top 10 Nearest Pharmacies:")
-                st.table(nearest_pharmacies_df)
+    if menu_option == "Pharmacy Location":
+        # If user chooses "Pharmacy Location," prompt for an address
+        user_input = st.text_input("Enter your address:", key="address_input")
 
-            else:
-                # No pharmacies found message
-                st.session_state.messages.append({
-                    "type": "assistant",
-                    "content": "No pharmacies found near your location."
-                })
-        else:
-            # Address not found message
+        if st.button("Send Address"):  # When user sends their address
+            # Store user message
             st.session_state.messages.append({
-                "type": "assistant",
-                "content": "Address not found. Please check and try again."
+                "role": "user",
+                "content": f"I'd like to know about pharmacies near this address: {user_input}",
             })
 
-# Display the updated chat conversation
-for msg in st.session_state.messages:
-    if msg["type"] == "user":
-        with st.chat_message("user"):
-            st.write(msg["content"])  # Display user message
-    elif msg["type"] == "assistant":
-        with st.chat_message("assistant"):
-            st.write(msg["content"])  # Display bot message
+            # Get the user's location from the address
+            user_latitude, user_longitude = get_user_location(user_input)
+
+            if user_latitude and user_longitude:
+                user_location = (user_latitude, user_longitude)
+
+                # Find the nearest pharmacies
+                nearest_pharmacies = find_nearest_pharmacies(user_location, yellow_pages, top_n=10)
+
+                if nearest_pharmacies:
+                    # Create the map with the nearest pharmacies
+                    map_object = create_pharmacy_map(user_location, nearest_pharmacies)
+
+                    # Store assistant message and display the map
+                    st.session_state.messages.append({
+                        "role": "assistant",
+                        "content": "Here's the map with the nearest pharmacies and their distances.",
+                    })
+                    folium_static(map_object)
+
+                    # Display the top 10 nearest pharmacies in a table
+                    nearest_pharmacies_df = pd.DataFrame(
+                        [
+                            (pharmacy["pharmacy_name"], f"{distance:.2f} km")
+                            for pharmacy, distance in nearest_pharmacies
+                        ],
+                        columns=["Pharmacy Name", "Distance (km)"],
+                    )
+                    st.subheader("Top 10 Nearest Pharmacies:")
+                    st.table(nearest_pharmacies_df)
+
+                else:
+                    # If no pharmacies are found near the user's location
+                    st.session_state.messages.append({
+                        "role": "assistant",
+                        "content": "No pharmacies found near your location.",
+                    })
+            else:
+                # If the address couldn't be geocoded or isn't valid
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": "Address not found. Please check and try again.",
+                })
+
+# Call the main function to start the app
+if __name__ == "__main__":
+    main()
