@@ -7,43 +7,15 @@ from folium.plugins import MarkerCluster
 from streamlit_folium import folium_static
 from streamlit_chat import message  # For chatbot-like interaction
 
-# Load your pharmacy data
+# Load your pharmacy data (example file path)
 yellow_pages = pd.read_csv('yellow_pages_pharmacy_df.csv')
-
-# Initialize chat history
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-with st.chat_message("user"):
-    st.write("Hello 👋")
-
-with st.chat_message("assistant"):
-    st.write("Hello human")
-
-# Display chat messages from history on app rerun
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-# Accept user input
-if prompt := st.chat_input("What is up?"):
-    # Display user message in chat message container
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    
-# Initialize conversation state
-if 'conversation' not in st.session_state:
-    # Start with a welcome message from the chatbot
-    st.session_state['conversation'] = [{"type": "bot", "text": "Hello! Please enter your address, and I'll find the nearest pharmacies for you."}]
 
 # Define the function to get user latitude and longitude from an address
 def get_user_location(address):
     geolocator = Nominatim(user_agent="geo_locator")
     location = geolocator.geocode(address)
     if location:
-        return location.latitude, location.longitude  # Return lat/long
+        return location.latitude, location.longitude
     else:
         return None, None
 
@@ -94,52 +66,104 @@ def create_pharmacy_map(user_location, nearest_pharmacies):
 
     return m
 
-# Start the chatbot conversation with a message from the bot
-st.title("Pharmacy Finder Chatbot")
-st.subheader("Enter your address to find the nearest pharmacies.")
-st.markdown("You can also ask questions or provide feedback in the chat.")
+# Main Streamlit function
+def main():
+    st.title("Streamlit Chat")
+    greeting = "Hi, how can I help you? Choose from menu items Diagnosis, OSHC, or Pharmacy Location."
 
+    # Initialize chat history
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    # Initialize menu choice
+    if "menu_choice" not in st.session_state:
+        st.session_state.menu_choice = None
+        
+    if "showSelect" not in st.session_state:
+        st.session_state.showSelect = False
 
-# Get user input for the chatbot
-user_input = st.text_input("Type your response here:", key="user_input")  # Chat-like input field
+    # Display initial message
+    with st.chat_message("assistant"):
+        st.markdown(greeting)
 
-if st.button("Send", key="send_button"):  # Ensure unique key for the button
-    if user_input:
-        st.session_state['conversation'].append({"type": "user", "text": user_input})
+    # Display chat history
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-        # Get the user's location from the address
-        user_latitude, user_longitude = get_user_location(user_input)
-        if user_latitude and user_longitude:
-            user_location = (user_latitude, user_longitude)
+    # Handle menu selection
+    if not st.session_state.menu_choice:
+        menu_choice = st.selectbox("Select a menu item:", ["Diagnosis", OSHC, or Pharmacy Location"])
+        if st.button("Submit"):
+            st.session_state.menu_choice = menu_choice
+            st.experimental_rerun()  # Re-run to update the menu choice
 
-            # Find the nearest pharmacies
-            nearest_pharmacies = find_nearest_pharmacies(user_location, yellow_pages, top_n=10)
+    # Check if a menu item is selected and ask for the user input
+    if st.session_state.menu_choice:
+        if not st.session_state.showSelect:
+            with st.chat_message("assistant"):
+                st.markdown(f"OK {st.session_state.menu_choice}")
+            st.session_state.showSelect = True
 
-            if nearest_pharmacies:
-                # Create the map with nearest pharmacies
-                map_object = create_pharmacy_map(user_location, nearest_pharmacies)
-                folium_static(map_object)
+        # Get user input
+        user_input = st.chat_input("What's up?")
 
-                # Display the top 10 nearest pharmacies in a table
-                nearest_pharmacies_df = pd.DataFrame(
-                    [(pharmacy['pharmacy_name'], f"{distance:.2f} km") for pharmacy, distance in nearest_pharmacies],
-                    columns=['Pharmacy Name', 'Distance (km)']
-                )
-                st.subheader("Top 10 Nearest Pharmacies:")
-                st.table(nearest_pharmacies_df)
+        if user_input:
+            # Display user input in the chat message
+            with st.chat_message("user"):
+                st.markdown(user_input)
 
-                # Add a chatbot response
-                st.session_state['conversation'].append({"type": "bot", "text": "Here's the map with the nearest pharmacies and their distances."})
-            else:
-                st.error("No pharmacies found near your location.")
-                st.session_state['conversation'].append({"type": "bot", "text": "No pharmacies were found near your location."})
-        else:
-            st.warning("Address not found. Please check and try again.")
-            st.session_state['conversation'].append({"type": "bot", "text": "I couldn't find your address. Please check and try again."})
+            if user_input.lower() == "quit":
+                # Reset the session state if "quit" is entered
+                st.session_state.messages = []
+                st.session_state.menu_choice = None
+                st.session_state.showSelect = False
+                with st.chat_message("assistant"):
+                    st.markdown("Thanks for using the chatbot! Restarting...")
+                st.experimental_rerun()  # Re-run after reset
 
-# Display the chatbot conversation with messages, each with a unique key
-for i, msg in enumerate(st.session_state['conversation']):
-    if msg["type"] == "user":
-        message(msg["text"], is_user=True, key=f"user_{i}")  # User message with unique key
-    else:
-        message(msg["text"], is_user=False, key=f"bot_{i}")  # Bot message with unique key
+            # Handle Pharmacy Location logic
+            if st.session_state.menu_choice == "Pharmacy Location":
+                # Ask for the address
+                with st.chat_message("assistant"):
+                    st.markdown("Please enter your address:")
+
+                # Get the user's location from the address
+                user_lat, user_lon = get_user_location(user_input)
+
+                if user_lat and user_lon:
+                    user_location = (user_lat, user_lon)
+
+                    # Find the nearest pharmacies
+                    nearest_pharmacies = find_nearest_pharmacies((user_location), yellow_pages, top_n=10)
+
+                    if nearest_pharmacies:
+                        # Create the map with nearest pharmacies
+                        map_object = create_pharmacy_map(user_location, nearest_pharmacies)
+                        folium_static(map_object)
+
+                        # Display the top 10 nearest pharmacies in a table
+                        nearest_pharmacies_df = pd.DataFrame(
+                            [(pharmacy['pharmacy_name'], f"{distance:.2f} km") for pharmacy, distance in nearest_pharmacies],
+                            columns=['Pharmacy Name', 'Distance (km)']
+                        )
+                        st.subheader("Top 10 Nearest Pharmacies:")
+                        st.table(nearest_pharmacies_df)
+
+                        # Add the response to the chat history
+                        st.session_state.messages.append(
+                            {"role": "assistant", "content": "Here's the map with the nearest pharmacies and their distances."}
+                        )
+                    else:
+                        st.error("No pharmacies found near your location.")
+                        st.session_state.messages.append(
+                            {"role": "assistant", "content": "No pharmacies found near your location."}
+                        )
+                else:
+                    st.warning("Address not found. Please check and try again.")
+                    st.session_state.messages.append(
+                        {"role": "assistant", "content": "Address not found. Please try again."}
+                    )
+
+# Run the Streamlit app
+if __name__ == "__main__":
+    main()
