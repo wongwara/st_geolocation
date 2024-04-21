@@ -126,11 +126,10 @@ def main():
                 st.experimental_rerun()  # Restart the chat flow
             else:
                 if st.session_state.menu_choice == 'Pharmacy Location':
-                    latitude, longitude = get_user_location(user_input)  # Get lat/lon from the address
-
-                # Check if the location was successfully retrieved
+                    latitude, longitude = get_user_location(user_input)
                 if latitude is not None and longitude is not None:
-                    user_location = (latitude, longitude)  # Tuple of latitude and longitude
+                    if latitude and longitude:
+                        user_location = (latitude, longitude)
                     nearest_pharmacies = find_nearest_pharmacies(user_location, yellow_pages)
                     create_pharmacy_map(user_location, nearest_pharmacies)  # Display map with pharmacies
                     
