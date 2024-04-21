@@ -53,7 +53,7 @@ def create_pharmacy_map(user_location, nearest_pharmacies):
         ).add_to(marker_cluster)
 
     folium_static(m)
-    
+
     # Display top 10 nearest pharmacies
     nearest_pharmacies_df = pd.DataFrame(
         [(pharmacy['pharmacy_name'], f"{pharmacy['distance']:.2f} km")],
@@ -85,20 +85,22 @@ def main():
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
-    
+
     # Handle menu choice
     if not st.session_state.menu_choice:
+        # Ask user to select a menu item
         menu_choice = st.selectbox("Select a menu item:", options=["Diagnosis", "OSHC", "Pharmacy Location"])
         if st.button("Submit"):
             st.session_state.menu_choice = menu_choice
-            st.rerun()  # Refresh the state to continue with the selected option
+            st.showSelect = True  # Allow further input after menu selection
+            st.rerun()  # Refresh the state after the menu choice
     
     # Process user input
     if st.session_state.menu_choice and st.session_state.showSelect:
-        user_input = st.chat_input("What's up?")
+        user_input = st.chat_input("Please enter your address:")
         
         if user_input:
-            # Display user input in chat and store the message
+            # Display user input and store the message
             with st.chat_message("user"):
                 st.markdown(user_input)
             st.session_state.messages.append({"role": "user", "content": user_input})
@@ -107,42 +109,32 @@ def main():
                 # Reset chat and menu choice
                 st.session_state.clear()
                 st.rerun()  # Restart the chat flow
-            # Generate response based on the menu choice
-            elif st.session_state.menu_choice == 'OSHC':
-                # response = get_response(user_input)
-                st.write('OSHC')
-            # with st.chat_message("assistant"):
-            #     st.markdown(f'OK {st.session_state.menu_choice}')
-            # response = f'OK {st.session_state.menu_choice}'
-            elif st.session_state.menu_choice == 'Diagnosis':
-                st.write('Diagnosis')
-                # response = chat.test(user_input)
-            # else:
-            # Call get_response() function for other menu items
-                # response = 'no'
-            elif st.session_state.menu_choice == 'Pharmacy Location':
-                st.write('Pharmacy Location')
-                user_location = None
-                response = "Please enter your location (address):"
-                if user_input:
+            else:
+                # Respond based on menu choice
+                response = ""
+                if st.session_state.menu_choice == 'Pharmacy Location':
                     latitude, longitude = get_user_location(user_input)
                     if latitude is not None and longitude is not None:
-                        user_location = (latitude, longitude)  # Tuple with lat/lon
+                        user_location = (latitude, longitude)
                         nearest_pharmacies = find_nearest_pharmacies(user_location, yellow_pages)
-                        create_pharmacy_map(user_location, nearest_pharmacies)  # Display map with pharmacies
+                        create_pharmacy_map(user_location, nearest_pharmacies)
                     
                         response = "Here are the nearest pharmacies:"
                         for i, pharmacy in enumerate(nearest_pharmacies, 1):
                             response += f"\n{i}. {pharmacy['pharmacy_name']} - Distance: {pharmacy['distance']:.2f} km"
                     else:
-                        response = "Sorry, I could not find your location. Please try again."
-            else:
+                        response = "Sorry, I could not find your location. Please try again with a different address."
+                elif st.session_state.menu_choice == 'OSHC':
+                    response = "OSHC selected"
+                elif st.session_state.menu_choice == 'Diagnosis':
+                    response = "Diagnosis selected"
+                else:
                     response = f"{st.session_state.menu_choice} chosen"
                     
                 # Store and display response from the assistant
-            st.session_state.messages.append({"role": "assistant", "content": response})
-            with st.chat_message("assistant"):
-                st.markdown(response)
+                st.session_state.messages.append({"role": "assistant", "content": response})
+                with st.chat_message("assistant"):
+                    st.markdown(response)
 
 if __name__ == "__main__":
     main()
