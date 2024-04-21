@@ -119,13 +119,14 @@ def main():
                 st.session_state.showSelect = False
                 with st.chat_message("assistant"):
                     st.markdown("Thanks for using the chatbot! Restarting...")
-                st.experimental_rerun()  # Re-run after reset
+                st.rerun()  # Re-run after reset
 
             # Handle Pharmacy Location logic
             if st.session_state.menu_choice == "Pharmacy Location":
                 # Ask for the address
                 with st.chat_message("assistant"):
                     st.markdown("Please enter your address:")
+                    st.session_state.address_asked = True
                  # Ask for the address
                 if "address_asked" not in st.session_state or not st.session_state.address_asked:
                     with st.chat_message("assistant"):
