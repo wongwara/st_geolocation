@@ -125,24 +125,29 @@ def main():
                 st.session_state.clear()
                 st.experimental_rerun()  # Restart the chat flow
             else:
-                # Handle Pharmacy Location
+                # Handle Pharmacy Location logic
                 if st.session_state.menu_choice == 'Pharmacy Location':
                     user_location = get_user_location(user_input)
-                    if user_location[0] is not None:
+    
+                    # Check if user location was successfully retrieved
+                    if user_location[0] is not None and user_location[1] is not None:
                         nearest_pharmacies = find_nearest_pharmacies(user_location, yellow_pages)
                         create_pharmacy_map(user_location, nearest_pharmacies)
-                        response = "Here are the nearest pharmacies:"
-                        for i, (pharmacy, distance) in enumerate(nearest_pharmacies, 1):
-                            response += f"\n{i}. {pharmacy['pharmacy_name']} - Distance: {distance:.2f} km"
-                    else:
-                        response = "Sorry, I could not find your location. Please try again!"
+
+                    # Generate a response listing nearest pharmacies
+                    response = "Here are the nearest pharmacies:"
+                    for i, (pharmacy, distance) in enumerate(nearest_pharmacies, 1):
+                        response += f"\n{i}. {pharmacy['pharmacy_name']} - Distance: {distance:.2f} km"
                 else:
-                    response = f"{st.session_state.menu_choice} chosen"
+                    # Error message if location cannot be found
+                    response = "Sorry, I could not find your location. Please provide a valid address."
+        else:
+            response = f"{st.session_state.menu_choice} chosen" 
 
                 # Store and display response from the assistant
-                st.session_state.messages.append({"role": "assistant", "content": response})
-                with st.chat_message("assistant"):
-                    st.markdown(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+            with st.chat_message("assistant"):
+            st.markdown(response)
 
 if __name__ == "__main__":
     main()
