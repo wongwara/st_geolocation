@@ -147,7 +147,7 @@ def main():
                 # Store and display response from the assistant
             st.session_state.messages.append({"role": "assistant", "content": response})
             with st.chat_message("assistant"):
-            st.markdown(response)
+                st.markdown(response)
 
 if __name__ == "__main__":
     main()
