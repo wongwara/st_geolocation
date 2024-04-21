@@ -41,7 +41,7 @@ def create_pharmacy_map(user_location, nearest_pharmacies):
     ).add_to(m)
 
     # Add markers for nearest pharmacies
-    for pharmacy in nearest pharmacies:
+    for pharmacy in nearest_pharmacies:
         popup_text = f"{pharmacy['pharmacy_name']}<br>Distance: {pharmacy['distance']:.2f} km"
         folium.Marker(
             location=(pharmacy['latitude'], pharmacy['longitude']),
