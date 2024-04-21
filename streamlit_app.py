@@ -10,16 +10,16 @@ from streamlit_chat import message  # For chatbot-like interaction
 # Load your pharmacy data
 yellow_pages = pd.read_csv("yellow_pages_pharmacy_df.csv")
 
-# Define function to get user latitude and longitude from an address
+# Function to get user latitude and longitude from an address
 def get_user_location(address):
     geolocator = Nominatim(user_agent="geo_locator")
     location = geolocator.geocode(address)
-    if location:
-        return location.latitude, location.longitude  # Return lat/long
+    if location and location.latitude and location.longitude:
+        return location.latitude, location.longitude
     else:
         return None, None
     
-# Define function to find the nearest pharmacies based on user location
+# Function to find the nearest pharmacies based on user location
 def find_nearest_pharmacies(user_location, pharmacies):
     pharmacies["distance"] = pharmacies.apply(
         lambda row: geodesic(user_location, (row["latitude"], row["longitude"])).kilometers,
@@ -28,12 +28,15 @@ def find_nearest_pharmacies(user_location, pharmacies):
     # Sort and get top 10 nearest pharmacies
     return pharmacies.sort_values("distance").head(10).to_dict(orient="records")
 
-# Define a function to create a Folium map with nearest pharmacies
+# Function to create a Folium map with nearest pharmacies
 def create_pharmacy_map(user_location, nearest_pharmacies):
+    if not user_location:
+        return  # Safely exit if user location is invalid
+
     m = folium.Map(location=user_location, zoom_start=15)
     marker_cluster = MarkerCluster().add_to(m)
 
-    # Add a marker for user location
+    # Add marker for user location
     folium.Marker(
         location=user_location,
         popup="Your Location",
@@ -58,13 +61,13 @@ def create_pharmacy_map(user_location, nearest_pharmacies):
     )
     st.subheader("Top 10 Nearest Pharmacies:")
     st.table(nearest_pharmacies_df)
-    
+
 def main():
     st.title("Streamlit Chat")
     
     # Initialize chat history if not already present
     if "messages" not in st.session_state:
-        st.session_state.messages = []
+        st.session_state.messages = [] 
     
     # Initialize menu choice and control state
     if "menu_choice" not in st.session_state:
@@ -88,7 +91,7 @@ def main():
         menu_choice = st.selectbox("Select a menu item:", options=["Diagnosis", "OSHC", "Pharmacy Location"])
         if st.button("Submit"):
             st.session_state.menu_choice = menu_choice
-            st.experimental_rerun()  # Refresh the state to continue with the selected option
+            st.rerun()  # Refresh the state to continue with the selected option
     
     # Process user input
     if st.session_state.menu_choice and st.session_state.showSelect:
@@ -103,16 +106,15 @@ def main():
             if user_input.lower() == "quit":
                 # Reset chat and menu choice
                 st.session_state.clear()
-                st.experimental_rerun()  # Restart the chat flow
+                st.rerun()  # Restart the chat flow
             else:
-                # Pharmacy Location handling
                 if st.session_state.menu_choice == 'Pharmacy Location':
                     latitude, longitude = get_user_location(user_input)
                     if latitude is not None and longitude is not None:
-                        user_location = (latitude, longitude)  # Tuple with lat/long
+                        user_location = (latitude, longitude)  # Tuple with lat/lon
                         nearest_pharmacies = find_nearest_pharmacies(user_location, yellow_pages)
-                        create_pharmacy_map(user_location, nearest_pharmacies)
-                        
+                        create_pharmacy_map(user_location, nearest_pharmacies)  # Display map with pharmacies
+                    
                         response = "Here are the nearest pharmacies:"
                         for i, pharmacy in enumerate(nearest_pharmacies, 1):
                             response += f"\n{i}. {pharmacy['pharmacy_name']} - Distance: {pharmacy['distance']:.2f} km"
@@ -120,7 +122,7 @@ def main():
                         response = "Sorry, I could not find your location. Please try again."
                 else:
                     response = f"{st.session_state.menu_choice} chosen"
-
+                    
                 # Store and display response from the assistant
                 st.session_state.messages.append({"role": "assistant", "content": response})
                 with st.chat_message("assistant"):
