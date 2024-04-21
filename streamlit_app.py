@@ -81,6 +81,14 @@ if len(st.session_state['conversation']) == 0:
 # Get user input for the chatbot
 user_input = st.text_input("You:", key="user_input")  # Chat-like input field
 
+# Display the chatbot conversation with messages, each with a unique key
+for i, msg in enumerate(st.session_state['conversation']):
+    if msg["type"] == "user":
+        message(msg["text"], is_user=True, key=f"user_{i}")  # User message with unique key
+    else:
+        message(msg["text"], is_user=False, key=f"bot_{i}")  # Bot message with unique key
+
+# Send the user input to the chatbot
 if st.button("Send", key="send_button"):  # Ensure unique key for the button
     if user_input:
         st.session_state['conversation'].append({"type": "user", "text": user_input})
@@ -115,9 +123,3 @@ if st.button("Send", key="send_button"):  # Ensure unique key for the button
             st.warning("Address not found. Please check and try again.")
             st.session_state['conversation'].append({"type": "bot", "text": "I couldn't find your address. Please check and try again."})
 
-# Display the chatbot conversation with messages, each with a unique key
-for i, msg in enumerate(st.session_state['conversation']):
-    if msg["type"] == "user":
-        message(msg["text"], is_user=True, key=f"user_{i}")  # User message with unique key
-    else:
-        message(msg["text"], is_user=False, key=f"bot_{i}")  # Bot message with unique key
