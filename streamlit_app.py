@@ -10,6 +10,8 @@ from streamlit_chat import message  # For chatbot-like interaction
 # Load your pharmacy data
 yellow_pages = pd.read_csv("yellow_pages_pharmacy_df.csv")
 
+chat_history = []
+
 # Function to get user latitude and longitude from an address
 def get_user_location(address):
     geolocator = Nominatim(user_agent="geo_locator")
@@ -96,26 +98,44 @@ def main():
             st.rerun()  # Refresh the state after the menu choice
     
     # Process user input
-    if st.session_state.menu_choice and st.session_state.showSelect:
-        user_input = st.chat_input("Please enter your address:")
+    if st.session_state.menu_choice is not None and st.session_state.showSelect is False:
+      response = f'OK {st.session_state.menu_choice}'
+      with st.chat_message("assistant"):   
+        st.markdown(response)
+      st.session_state.showSelect = True
+      st.session_state.messages.append({"role": "assistant", "content": response})
+    if st.session_state.menu_choice is not None:
+      user_input = st.chat_input("What's up?")
+    
+    if user_input:
+        # Display user input in chat message container
+        with st.chat_message("user"):
+            st.markdown(user_input)
         
-        if user_input:
-            # Display user input and store the message
-            with st.chat_message("user"):
-                st.markdown(user_input)
-            st.session_state.messages.append({"role": "user", "content": user_input})
+        if user_input == 'quit':          
+          
+          st.session_state.messages = []
+          st.session_state.menu_choice = None
+          st.session_state.showSelect = False
+          response = 'Thanks'
+          print(chat_history)
+          st.experimental_rerun()
+          
+        # Generate response based on the menu choice
+        elif st.session_state.menu_choice == 'OSHC':
+            st.write('OSHC selected')
+        #   response = get_response(user_input)
+          # with st.chat_message("assistant"):
+          #     st.markdown(f'OK {st.session_state.menu_choice}')
+          # response = f'OK {st.session_state.menu_choice}'
+        elif st.session_state.menu_choice == 'Diagnosis':
+        #   response = chat.test(user_input)
+            st.write('Diagnosis selected')
 
-            if user_input.lower() == "quit":
-                # Reset chat and menu choice
-                st.session_state.clear()
-                st.rerun()  # Restart the chat flow
-            else:
-                # Respond based on menu choice
-                response = ""
-                if st.session_state.menu_choice == 'Pharmacy Location':
-                    user_input = st.chat_input("Please enter your address:")
-                    latitude, longitude = get_user_location(user_input)
-                if latitude is not None and longitude is not None:
+        elif st.session_state.menu_choice == 'Pharmacy Location':
+            user_input = st.chat_input("Please enter your address:")
+            latitude, longitude = get_user_location(user_input)
+            if latitude is not None and longitude is not None:
                     user_location = (latitude, longitude)
                     nearest_pharmacies = find_nearest_pharmacies(user_location, yellow_pages)
                     create_pharmacy_map(user_location, nearest_pharmacies)
@@ -125,12 +145,9 @@ def main():
                         response += f"\n{i}. {pharmacy['pharmacy_name']} - Distance: {pharmacy['distance']:.2f} km"
                     else:
                         response = "Sorry, I could not find your location. Please try again with a different address."
-                elif st.session_state.menu_choice == 'OSHC':
-                    response = "OSHC selected"
-                elif st.session_state.menu_choice == 'Diagnosis':
-                    response = "Diagnosis selected"
-                else:
-                    response = f"{st.session_state.menu_choice} chosen"
+
+        else:
+            response = f"{st.session_state.menu_choice} chosen"
                 
             # Store and display response from the assistant
             st.session_state.messages.append({"role": "assistant", "content": response})
