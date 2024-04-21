@@ -10,8 +10,6 @@ from streamlit_chat import message  # For chatbot-like interaction
 # Load your pharmacy data
 yellow_pages = pd.read_csv("yellow_pages_pharmacy_df.csv")
 
-# Add the necessary imports and function definitions here
-
 # Define function to get user latitude and longitude from an address
 def get_user_location(address):
     geolocator = Nominatim(user_agent="geo_locator")
@@ -145,3 +143,6 @@ def main():
                 st.session_state.messages.append({"role": "assistant", "content": response})
                 with st.chat_message("assistant"):
                     st.markdown(response)
+
+if __name__ == "__main__":
+    main()
