@@ -126,11 +126,20 @@ def main():
                 # Ask for the address
                 with st.chat_message("assistant"):
                     st.markdown("Please enter your address:")
-
+                 # Ask for the address
+                if "address_asked" not in st.session_state or not st.session_state.address_asked:
+                    with st.chat_message("assistant"):
+                        st.markdown("Please enter your address:")
+                        st.session_state.address_asked = True
+        
+                # Check for address input and process it
+                if user_input := st.text_input("Address:"):
+                    lat, lon = get_user_location(user_input)
+                if lat and lon:
+                    st.session_state.address_asked = False  # Reset once address is found
+                # Implement the logic for finding nearest pharmacies and creating map
                 # Get the user's location from the address
-                user_lat, user_lon = get_user_location(user_input)
-
-                if user_lat and user_lon:
+                    user_lat, user_lon = get_user_location(user_input)
                     user_location = (user_lat, user_lon)
 
                     # Find the nearest pharmacies
