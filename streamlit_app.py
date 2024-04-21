@@ -92,7 +92,7 @@ def main():
 
     # Handle menu selection
     if not st.session_state.menu_choice:
-        menu_choice = st.selectbox("Select a menu item:", ["Diagnosis", OSHC, or Pharmacy Location"])
+        menu_choice = st.selectbox("Select a menu item:", ["Diagnosis, OSHC, or Pharmacy Location"])
         if st.button("Submit"):
             st.session_state.menu_choice = menu_choice
             st.experimental_rerun()  # Re-run to update the menu choice
