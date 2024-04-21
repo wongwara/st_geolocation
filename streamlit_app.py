@@ -120,59 +120,37 @@ def main():
                 with st.chat_message("assistant"):
                     st.markdown("Thanks for using the chatbot! Restarting...")
                 st.rerun()  # Re-run after reset
-
-            # Handle Pharmacy Location logic
-            if st.session_state.menu_choice == "Pharmacy Location":
-                # Ask for the address
+        # Handle Pharmacy Location logic
+        if st.session_state.menu_choice == "Pharmacy Location":
+            if not st.session_state.address_asked:
                 with st.chat_message("assistant"):
-                    st.markdown("Please enter your address:")
-                    st.session_state.address_asked = True
-                 # Ask for the address
-                if "address_asked" not in st.session_state or not st.session_state.address_asked:
-                    with st.chat_message("assistant"):
-                        st.markdown("Please enter your address:")
-                        st.session_state.address_asked = True
+                   st.markdown("Please enter your address:")
+                st.session_state.address_asked = True
         
-                # Check for address input and process it
-                if user_input := st.text_input("Address:"):
-                    lat, lon = get_user_location(user_input)
-                if lat and lon:
-                    st.session_state.address_asked = False  # Reset once address is found
-                # Implement the logic for finding nearest pharmacies and creating map
-                # Get the user's location from the address
-                    user_lat, user_lon = get_user_location(user_input)
-                    user_location = (user_lat, user_lon)
+        # Check for address input and process it
+        if user_input := st.text_input("Address:"):
+            lat, lon = get_user_location(user_input)
+            if lat and lon:
+                user_location = (lat, lon)
 
-                    # Find the nearest pharmacies
-                    nearest_pharmacies = find_nearest_pharmacies((user_location), yellow_pages, top_n=10)
+                # Find nearest pharmacies and create map
+                nearest_pharmacies = find_nearest_pharmacies(user_location, yellow_pages, top_n=10)
+                if nearest_pharmacies:
+                    map_object = create_pharmacy_map(user_location, nearest_pharmacies)
+                    folium_static(map_object)
 
-                    if nearest_pharmacies:
-                        # Create the map with nearest pharmacies
-                        map_object = create_pharmacy_map(user_location, nearest_pharmacies)
-                        folium_static(map_object)
-
-                        # Display the top 10 nearest pharmacies in a table
-                        nearest_pharmacies_df = pd.DataFrame(
-                            [(pharmacy['pharmacy_name'], f"{distance:.2f} km") for pharmacy, distance in nearest_pharmacies],
-                            columns=['Pharmacy Name', 'Distance (km)']
-                        )
-                        st.subheader("Top 10 Nearest Pharmacies:")
-                        st.table(nearest_pharmacies_df)
-
-                        # Add the response to the chat history
-                        st.session_state.messages.append(
-                            {"role": "assistant", "content": "Here's the map with the nearest pharmacies and their distances."}
-                        )
-                    else:
-                        st.error("No pharmacies found near your location.")
-                        st.session_state.messages.append(
-                            {"role": "assistant", "content": "No pharmacies found near your location."}
-                        )
-                else:
-                    st.warning("Address not found. Please check and try again.")
-                    st.session_state.messages.append(
-                        {"role": "assistant", "content": "Address not found. Please try again."}
+                    nearest_pharmacies_df = pd.DataFrame(
+                        [(pharmacy["pharmacy_name"], f"{distance:.2f} km") for pharmacy, distance in nearest_pharmacies],
+                        columns=["Pharmacy Name", "Distance (km)"],
                     )
+                    st.subheader("Top 10 Nearest Pharmacies:")
+                    st.table(nearest_pharmacies_df)
+                else:
+                    with st.chat_message("assistant"):
+                        st.markdown("No pharmacies found near your location.")
+            else:
+                with st.chat_message("assistant"):
+                    st.markdown("Could not determine your location. Please try again with a valid address.")        
 
 # Run the Streamlit app
 if __name__ == "__main__":
