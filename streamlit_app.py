@@ -90,24 +90,37 @@ def main():
             st.markdown(message["content"])
 
     # Display a select box for the user to choose a menu option
-    menu_option = st.selectbox(
-        "Choose an option:",
-        ["Select", "Diagnosis", "OSHC", "Pharmacy Location"],
-        key="menu_option",
-    )
+    if not st.session_state.menu_choice:
+        menu_choice = st.selectbox("Select a menu item:", options=["Diagnosis", "OSHC", "Pharmacy Location"])
+        if st.button("Submit"):
+            st.session_state.menu_choice = menu_choice
+            print(st.session_state)
 
-    if menu_option == "Pharmacy Location":
-        # If user chooses "Pharmacy Location," prompt for an address
-        user_input = st.text_input("Enter your address:", key="address_input")
+    # Only display the select box if no menu choice has been made
+    if not st.session_state.menu_choice:
+        menu_choice = st.selectbox("Select a menu item:", options=["Diagnosis", "OSHC", "Pharmacy Location"], key="menu_selection")
+    
+        if st.button("Submit"):
+            st.session_state.menu_choice = menu_choice
+            st.write(f"You selected: {menu_choice}")  # Optional feedback to user
 
-        if st.button("Send Address"):  # When user sends their address
+    # Further logic to handle menu choice
+    if st.session_state.menu_choice == "Pharmacy Location":
+        # Actions to perform when "Pharmacy Location" is selected
+        st.write("You chose Pharmacy Location. Please provide your address for further assistance.")
+    
+        # Get user input for address
+        address = st.text_input("Enter your address:")
+    
+        if st.button("Submit Address"):  # Button to submit the address
+            # Store or process the address input
+            st.write(f"You entered: {address}")
             # Store user message
             st.session_state.messages.append({
                 "role": "user",
                 "content": f"I'd like to know about pharmacies near this address: {user_input}",
             })
-
-            # Get the user's location from the address
+             # Get the user's location from the address
             user_latitude, user_longitude = get_user_location(user_input)
 
             if user_latitude and user_longitude:
@@ -150,6 +163,20 @@ def main():
                     "role": "assistant",
                     "content": "Address not found. Please check and try again.",
                 })
+
+    # Additional logic for other menu choices
+    elif st.session_state.menu_choice == "Diagnosis":
+        st.write("Diagnosis option selected. Follow related steps.")
+
+    elif st.session_state.menu_choice == "OSHC":
+        st.write("OSHC option selected. Follow related steps.")
+    
+        if st.button("Send Address"):  # When user sends their address
+            # Store user message
+            st.session_state.messages.append({
+                "role": "user",
+                "content": f"I'd like to know about pharmacies near this address: {user_input}",
+            })
 
 # Call the main function to start the app
 if __name__ == "__main__":
