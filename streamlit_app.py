@@ -10,6 +10,10 @@ from streamlit_chat import message  # For chatbot-like interaction
 # Load your pharmacy data
 yellow_pages = pd.read_csv("yellow_pages_pharmacy_df.csv")
 
+# Add the necessary imports and function definitions here
+chat_history = []
+
+
 # Initialize chat history if not already present
 if "messages" not in st.session_state:
     st.session_state.messages = []  # List of chat messages
@@ -163,7 +167,31 @@ def main():
                     "role": "assistant",
                     "content": "Address not found. Please check and try again.",
                 })
+    user_input = None
+    if st.session_state.menu_choice is not None and st.session_state.showSelect is False:
+      response = f'OK {st.session_state.menu_choice}'
+      with st.chat_message("assistant"):   
+        st.markdown(response)
+      st.session_state.showSelect = True
+      st.session_state.messages.append({"role": "assistant", "content": response})
+    if st.session_state.menu_choice is not None:
+      user_input = st.chat_input("What's up?")
 
+    if user_input:
+        # Display user input in chat message container
+        with st.chat_message("user"):
+            st.markdown(user_input)
+        
+        if user_input == 'quit':
+          
+          
+          st.session_state.messages = []
+          st.session_state.menu_choice = None
+          st.session_state.showSelect = False
+          response = 'Thanks'
+          print(chat_history)
+          st.experimental_rerun()
+    
     # Additional logic for other menu choices
     elif st.session_state.menu_choice == "Diagnosis":
         st.write("Diagnosis option selected. Follow related steps.")
