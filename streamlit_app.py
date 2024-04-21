@@ -121,6 +121,10 @@ def main():
             # Call get_response() function for other menu items
                 # response = 'no'
             elif st.session_state.menu_choice == 'Pharmacy Location':
+                st.write('Pharmacy Location')
+                user_location = None
+                response = "Please enter your location (address or postal code):"
+                if user_input:
                     latitude, longitude = get_user_location(user_input)
                     if latitude is not None and longitude is not None:
                         user_location = (latitude, longitude)  # Tuple with lat/lon
