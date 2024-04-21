@@ -128,7 +128,6 @@ def main():
                 st.session_state.address_asked = True
         
         # Check for address input and process it
-            if user_input := st.chat_input("Address:"):
                 lat, lon = get_user_location(user_input)
                 if lat and lon:
                     user_location = (lat, lon)
