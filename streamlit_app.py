@@ -41,7 +41,7 @@ def create_pharmacy_map(user_location, nearest_pharmacies):
     ).add_to(m)
 
     # Add markers for nearest pharmacies
-    for pharmacy in nearest_pharmacies:
+    for pharmacy in nearest pharmacies:
         popup_text = f"{pharmacy['pharmacy_name']}<br>Distance: {pharmacy['distance']:.2f} km"
         folium.Marker(
             location=(pharmacy['latitude'], pharmacy['longitude']),
@@ -51,11 +51,10 @@ def create_pharmacy_map(user_location, nearest_pharmacies):
 
     folium_static(m)
 
-# Main function
 def main():
     st.title("Streamlit Chat")
 
-    # Initialize chat history and session state
+    # Initialize session state
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
@@ -72,45 +71,50 @@ def main():
         menu_choice = st.selectbox("Select a menu item:", options=["Diagnosis", "OSHC", "Pharmacy Location"], key="menu_choice_select")
         if st.button("Submit", key="menu_submit"):
             st.session_state.menu_choice = menu_choice
-            st.rerun()
+            st.experimental_rerun()
 
     # Process user input
-    if st.session_state.menu_choice == "Pharmacy Location":
-        if "user_location" not in st.session_state:
-            # Ask for user input to get their location
-            user_input = st.chat_input("Please enter your address:", key="user_address")
+    user_input = None  # Initialize user_input to avoid referencing issues
+
+    if st.session_state.menu_choice is not None:
+        user_input = st.chat_input("What's up?")  # Create a unique key or condition
+
+    # If user_input is defined, process it
+    if user_input:
+        with st.chat_message("user"):
+            st.markdown(user_input)
+
+        if user_input.lower() == "quit":
+            # Clear session state on quit
+            st.session_state.clear()
+            st.experimental_rerun()
+
+        elif st.session_state.menu_choice == "OSHC":
+            st.write("OSHC selected")
+
+        elif st.session_state.menu_choice == "Diagnosis":
+            st.write("Diagnosis selected")
+
+        elif st.session_state.menu_choice == "Pharmacy Location":
+            # Request user location input
+            user_input = st.chat_input("Please enter your address:")
             if user_input:
                 latitude, longitude = get_user_location(user_input)
-                if latitude is not None and longitude is not None:
-                    st.session_state["user_location"] = (latitude, longitude)
-                    nearest_pharmacies = find_nearest_pharmacies(st.session_state["user_location"], yellow_pages)
-                    create_pharmacy_map(st.session_state["user_location"], nearest_pharmacies)
+                if latitude and longitude:
+                    user_location = (latitude, longitude)
+                    nearest_pharmacies = find_nearest_pharmacies(user_location, yellow_pages)
+                    create_pharmacy_map(user_location, nearest_pharmacies)
 
                     response = "Here are the nearest pharmacies:"
                     for i, pharmacy in enumerate(nearest_pharmacies, 1):
                         response += f"\n{i}. {pharmacy['pharmacy_name']} - Distance: {pharmacy['distance']:.2f} km"
 
-                    # Store and display response
                     st.session_state.messages.append({"role": "assistant", "content": response})
                     with st.chat_message("assistant"):
                         st.markdown(response)
                 else:
                     response = "Sorry, could not find the location. Please try again."
-                    with st.chat_message("assistant"):
-                        st.markdown(response)
-        else:
-            st.write("Pharmacy Location menu chosen. Please provide an address.")
-
-    elif st.session_state.menu_choice == "Diagnosis":
-        st.write("Diagnosis menu chosen.")
-    
-    elif st.session_state.menu_choice == "OSHC":
-        st.write("OSHC menu chosen.")
-
-    # If user enters "quit", clear the session state and restart
-    if user_input == "quit":
-        st.session_state.clear()
-        st.experimental_rerun()
+                    st.session_state.messages.append({"role": "assistant", "content": response})
 
 if __name__ == "__main__":
     main()
