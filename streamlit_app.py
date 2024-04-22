@@ -107,7 +107,7 @@ def main():
             st.session_state.showSelect = True
 
         # Get user input
-        user_input = st.chat_input("What's up?")
+        user_input = st.chat_input("Selected Pharmacy location - Please enter your address: ")
 
         if user_input:
             # Display user input in the chat message
