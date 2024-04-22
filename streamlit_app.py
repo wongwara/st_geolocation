@@ -107,7 +107,7 @@ def main():
     if st.session_state.menu_choice:
         if not st.session_state.showSelect:
             with st.chat_message("assistant"):
-                st.markdown(f"OK {st.session_state.menu_choice}")
+                st.markdown(f"OK You selected {st.session_state.menu_choice}")
                 if st.session_state.menu_choice == "Pharmacy Location":
                     st.markdown("for the Pharmacy Location - Please enter your address:")
                 else:
