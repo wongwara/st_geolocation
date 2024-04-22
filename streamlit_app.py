@@ -48,11 +48,12 @@ def create_pharmacy_map(user_location, nearest_pharmacies):
         icon=folium.Icon(color="green"),
     ).add_to(marker_cluster)
 
-    # Add markers for nearest pharmacies
+    # Add markers for nearest pharmacies with distance and name in the popup text
     for pharmacy, distance in nearest_pharmacies:
         popup_text = f"{pharmacy['pharmacy_name']} - Distance: {distance:.2f} km"
         folium.Marker(
             location=(pharmacy['latitude'], pharmacy['longitude']),
+            popup=popup_text,
             icon=folium.Icon(color="blue"),
         ).add_to(marker_cluster)
 
@@ -60,7 +61,7 @@ def create_pharmacy_map(user_location, nearest_pharmacies):
     nearest_pharmacy = nearest_pharmacies[0][0]
     folium.Marker(
         location=(nearest_pharmacy['latitude'], nearest_pharmacy['longitude']),
-        popup=f"Nearest Pharmacy: {nearest_pharmacy['pharmacy_name']}",
+        popup=f"Nearest Pharmacy: {nearest_pharmacy['pharmacy_name']} - Distance: {nearest_pharmacy[1]:.2f} km",
         icon=folium.Icon(color="red"),
     ).add_to(m)
 
