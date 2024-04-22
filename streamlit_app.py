@@ -104,6 +104,7 @@ def main():
         if not st.session_state.showSelect:
             with st.chat_message("assistant"):
                 st.markdown(f"OK {st.session_state.menu_choice}")
+                st.markdown("for the Pharmacy Location - Please enter your address:")
             st.session_state.showSelect = True
 
         # Get user input
@@ -125,7 +126,10 @@ def main():
 
             # Handle Pharmacy Location logic
             if st.session_state.menu_choice == "Pharmacy Location":
-                st.markdown("Please enter your address:")
+                with st.chat_message("assistant"):
+                    st.markdown("Please enter your address:")
+                with st.chat_message("user"):
+                    st.markdown(user_input)
                 # Ask for the address
                 with st.chat_message("assistant"):
                     st.markdown("Here's the map with the nearest pharmacies and their distances:")
