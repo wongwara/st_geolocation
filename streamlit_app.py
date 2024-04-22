@@ -111,9 +111,6 @@ def main():
         user_input = st.chat_input("Selected Pharmacy location - Please enter your address: ")
 
         if user_input:
-            # Display user input in the chat message
-            with st.chat_message("user"):
-                st.markdown(user_input)
 
             if user_input.lower() == "quit":
                 # Reset the session state if "quit" is entered
