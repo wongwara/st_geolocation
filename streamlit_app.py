@@ -100,6 +100,7 @@ def main():
     # Handle menu selection
     if not st.session_state.menu_choice:
         menu_choice = st.selectbox("Select a menu item:", ["Diagnosis", "OSHC", "Pharmacy Location"])
+        st.markdown(information)
         if st.button("Submit"):
             st.session_state.menu_choice = menu_choice
             st.experimental_rerun()  # Re-run to update the menu choice
@@ -175,7 +176,7 @@ def main():
                     st.session_state.messages.append(
                             {"role": "assistant", "content": "Address not found. Please try again."}
                     )
-        st.markdown(information)
+
 # Run the Streamlit app
 if __name__ == "__main__":
     main()
