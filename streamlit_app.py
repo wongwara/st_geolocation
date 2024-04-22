@@ -45,8 +45,8 @@ def create_pharmacy_map(user_location, nearest_pharmacies):
     folium.Marker(
         location=user_location,
         popup="Your Location",
-        icon=folium.Icon(color="green"),
-    ).add_to(marker_cluster)
+        icon=folium.Icon(color="orange"),
+    ).add_to(m)
 
     # Add markers for nearest pharmacies with distance and name in the popup text
     for pharmacy, distance in nearest_pharmacies:
