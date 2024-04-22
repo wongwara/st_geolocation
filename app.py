@@ -157,7 +157,7 @@ def main():
                             columns=['Pharmacy Name', 'Distance (km)']
                         )
                         with st.chat_message("assistant"):
-                            st.subheader("Top 10 Nearest Pharmacies:")
+                            st.markdown("Top 10 Nearest Pharmacies:")
                             st.table(nearest_pharmacies_df)
 
                         # Add the response to the chat history

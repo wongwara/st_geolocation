@@ -7,6 +7,7 @@ from folium.plugins import MarkerCluster
 from streamlit_folium import folium_static
 from streamlit_chat import message  # For chatbot-like interaction
 
+
 # Load your pharmacy data
 yellow_pages = pd.read_csv('yellow_pages_pharmacy_df.csv')
 
@@ -72,20 +73,23 @@ def create_pharmacy_map(user_location, nearest_pharmacies):
 def main():
     st.title("Streamlit Chat")
     greeting = "Hi, how can I help you? Choose from menu items Diagnosis, OSHC, or Pharmacy Location."
+    information = 'This application is demo application for chatbot. You can ask for the Pharmacy Location.'
 
     # Initialize chat history
     if "messages" not in st.session_state:
         st.session_state.messages = []
+
     # Initialize menu choice
     if "menu_choice" not in st.session_state:
         st.session_state.menu_choice = None
-        
+    
     if "showSelect" not in st.session_state:
         st.session_state.showSelect = False
 
     # Display initial message
     with st.chat_message("assistant"):
         st.markdown(greeting)
+        st.markdown(information)
 
     # Display chat history
     for message in st.session_state.messages:
@@ -104,11 +108,14 @@ def main():
         if not st.session_state.showSelect:
             with st.chat_message("assistant"):
                 st.markdown(f"OK {st.session_state.menu_choice}")
-                st.markdown("for the Pharmacy Location - Please enter your address:")
+                if st.session_state.menu_choice == "Pharmacy Location":
+                    st.markdown("for the Pharmacy Location - Please enter your address:")
+                else:
+                    st.markdown("Please wait for the update version in the future.")
             st.session_state.showSelect = True
 
         # Get user input
-        user_input = st.chat_input("Selected Pharmacy location - Please enter your address: ")
+        user_input = st.chat_input("What's up? You can type 'quit' to restart.")
 
         if user_input:
 
@@ -149,8 +156,9 @@ def main():
                             [(pharmacy['pharmacy_name'], f"{distance:.2f} km") for pharmacy, distance in nearest_pharmacies],
                             columns=['Pharmacy Name', 'Distance (km)']
                         )
-                        st.subheader("Top 10 Nearest Pharmacies:")
-                        st.table(nearest_pharmacies_df)
+                        with st.chat_message("assistant"):
+                            st.markdown("Top 10 Nearest Pharmacies:")
+                            st.table(nearest_pharmacies_df)
 
                         # Add the response to the chat history
                         st.session_state.messages.append(
