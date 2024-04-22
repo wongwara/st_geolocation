@@ -7,7 +7,7 @@ from folium.plugins import MarkerCluster
 from streamlit_folium import folium_static
 from streamlit_chat import message  # For chatbot-like interaction
 
-# Load your pharmacy data (example file path)
+# Load your pharmacy data
 yellow_pages = pd.read_csv('yellow_pages_pharmacy_df.csv')
 
 # Define the function to get user latitude and longitude from an address
@@ -36,7 +36,7 @@ def find_nearest_pharmacies(user_location, pharmacies, top_n=10):
     sorted_distances = sorted(distances, key=lambda x: x[1])
     return sorted_distances[:top_n]
 
-# Function to create a Folium map with nearest pharmacies
+# Function to create a Folium map with nearest pharmacies and their details
 def create_pharmacy_map(user_location, nearest_pharmacies):
     m = folium.Map(location=user_location, zoom_start=14)
     marker_cluster = MarkerCluster().add_to(m)
@@ -93,7 +93,7 @@ def main():
 
     # Handle menu selection
     if not st.session_state.menu_choice:
-        menu_choice = st.selectbox("Select a menu item:", ["Diagnosis", "OSHC", "Pharmacy Location"])
+        menu_choice = st.selectbox("Select a menu item:", ["Diagnosis", "OSHC", or Pharmacy Location"])
         if st.button("Submit"):
             st.session_state.menu_choice = menu_choice
             st.experimental_rerun()  # Re-run to update the menu choice
@@ -139,12 +139,12 @@ def main():
 
                     if nearest_pharmacies:
                         # Create the map with nearest pharmacies
-                        map_object = create_pharmacy_map(user_location, nearest_pharmacies)
+                        map_object = create_pharmacy_map(user_location, nearest pharmacies)
                         folium_static(map_object)
 
                         # Display the top 10 nearest pharmacies in a table
                         nearest_pharmacies_df = pd.DataFrame(
-                            [(pharmacy['pharmacy_name'], f"{distance:.2f} km") for pharmacy, distance in nearest_pharmacies],
+                            [(pharmacy['pharmacy_name'], f"{distance:.2f} km") for pharmacy, distance in nearest pharmacies],
                             columns=['Pharmacy Name', 'Distance (km)']
                         )
                         st.subheader("Top 10 Nearest Pharmacies:")
@@ -162,7 +162,7 @@ def main():
                 else:
                     st.warning("Address not found. Please check and try again.")
                     st.session_state.messages.append(
-                        {"role": "assistant", "content": "Address not found. Please try again."}
+                            {"role": "assistant", "content": "Address not found. Please try again."}
                     )
 
 # Run the Streamlit app
