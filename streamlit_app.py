@@ -139,12 +139,12 @@ def main():
 
                     if nearest_pharmacies:
                         # Create the map with nearest pharmacies
-                        map_object = create_pharmacy_map(user_location, nearest pharmacies)
+                        map_object = create_pharmacy_map(user_location, nearest_pharmacies)
                         folium_static(map_object)
 
                         # Display the top 10 nearest pharmacies in a table
                         nearest_pharmacies_df = pd.DataFrame(
-                            [(pharmacy['pharmacy_name'], f"{distance:.2f} km") for pharmacy, distance in nearest pharmacies],
+                            [(pharmacy['pharmacy_name'], f"{distance:.2f} km") for pharmacy, distance in nearest_pharmacies],
                             columns=['Pharmacy Name', 'Distance (km)']
                         )
                         st.subheader("Top 10 Nearest Pharmacies:")
