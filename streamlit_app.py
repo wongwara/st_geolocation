@@ -71,7 +71,7 @@ def create_pharmacy_map(user_location, nearest_pharmacies):
 
 # Main Streamlit function
 def main():
-    st.title("Streamlit Chat")
+    st.title("Oversea Student Health Chatbot")
     greeting = "Hi, how can I help you? Choose from menu items Diagnosis, OSHC, or Pharmacy Location."
     information = 'This application is demo application for chatbot. You can ask for the Pharmacy Location.'
 
