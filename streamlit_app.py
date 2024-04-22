@@ -125,9 +125,10 @@ def main():
 
             # Handle Pharmacy Location logic
             if st.session_state.menu_choice == "Pharmacy Location":
+                st.markdown("Please enter your address:")
                 # Ask for the address
                 with st.chat_message("assistant"):
-                    st.markdown("Please enter your address:")
+                    st.markdown("Here's the map with the nearest pharmacies and their distances:")
         
                 # Get the user's location from the address
                     user_lat, user_lon = get_user_location(user_input)
