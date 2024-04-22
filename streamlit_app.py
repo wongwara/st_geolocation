@@ -131,33 +131,6 @@ def main():
         
                 # Get the user's location from the address
                     user_lat, user_lon = get_user_location(user_input)
-                    user_location = (user_lat, user_lon)
-
-                    # Find the nearest pharmacies
-                    nearest_pharmacies = find_nearest_pharmacies((user_location), yellow_pages, top_n=10)
-
-                    if nearest_pharmacies:
-                        # Create the map with nearest pharmacies
-                        map_object = create_pharmacy_map(user_location, nearest_pharmacies)
-                        folium_static(map_object)
-
-                        # Display the top 10 nearest pharmacies in a table
-                        nearest_pharmacies_df = pd.DataFrame(
-                            [(pharmacy['pharmacy_name'], f"{distance:.2f} km") for pharmacy, distance in nearest_pharmacies],
-                            columns=['Pharmacy Name', 'Distance (km)']
-                        )
-                        st.subheader("Top 10 Nearest Pharmacies:")
-                        st.table(nearest_pharmacies_df)
-
-                        # Add the response to the chat history
-                        st.session_state.messages.append(
-                            {"role": "assistant", "content": "Here's the map with the nearest pharmacies and their distances."}
-                        )
-                    else:
-                        st.error("No pharmacies found near your location.")
-                        st.session_state.messages.append(
-                            {"role": "assistant", "content": "No pharmacies found near your location."}
-                        )
                 if user_lat and user_lon:
                     user_location = (user_lat, user_lon)
 
