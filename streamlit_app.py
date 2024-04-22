@@ -72,7 +72,8 @@ def create_pharmacy_map(user_location, nearest_pharmacies):
 # Main Streamlit function
 def main():
     st.title(" 🤖 Oversea Student Health Chatbot")
-    greeting = "Hi, how can I help you? Choose from menu items Diagnosis, OSHC, or Pharmacy Location."
+    greeting = "Hi, how can I help you? "
+    option_to_choose = "Choose from menu items Diagnosis, OSHC, or Pharmacy Location."
     information = 'This application is demo application for chatbot. You can ask for the Pharmacy Location.'
 
     # Initialize chat history
@@ -89,7 +90,7 @@ def main():
     # Display initial message
     with st.chat_message("assistant"):
         st.markdown(greeting)
-        st.markdown(information)
+        st.markdown(option_to_choose)
 
     # Display chat history
     for message in st.session_state.messages:
@@ -174,7 +175,7 @@ def main():
                     st.session_state.messages.append(
                             {"role": "assistant", "content": "Address not found. Please try again."}
                     )
-
+        st.markdown(information)
 # Run the Streamlit app
 if __name__ == "__main__":
     main()
