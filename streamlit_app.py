@@ -57,7 +57,7 @@ def create_pharmacy_map(user_location, nearest_pharmacies):
             location=(pharmacy['latitude'], pharmacy['longitude']),
             icon=folium.Icon(color="blue"),
             popup=popup_text,
-        ).add_to(marker_cluster)
+        ).add_to(m)
 
     # Highlight the nearest pharmacy with a red icon and a popup with distance and name
     nearest_pharmacy, nearest_distance = nearest_pharmacies[0]
@@ -129,7 +129,7 @@ def main():
                     (pharmacy, distance) for pharmacy, distance in nearest_pharmacies if distance <= max_distance_km
                 ]
 
-                if filtered_pharmacies:
+                if filtered_pharmacies is None:
                     response = "Here's the map with the nearest pharmacies and their distances."
 
                     # Create the map with filtered pharmacies
