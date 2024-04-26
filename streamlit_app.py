@@ -233,18 +233,17 @@ def main():
         with st.chat_message("assistant"):
             st.markdown("Please enter your address:")
         
-        user_input = st.chat_input("Enter your address or type 'quit' to restart:")
+    user_input = st.chat_input("Enter your address or type 'quit' to restart:")
 
-       # Check if user input is not empty or None
-    if user_input and isinstance(user_input, str):
-        if user_input.lower() == "quit":
+    # Check if user input is not empty or None
+    if user_input.lower() == "quit":
             # Reset the session state if "quit" is entered
             st.session_state.messages = []
             st.session_state.menu_choice = None
             st.experimental_rerun()  # Re-run after reset
 
 
-        elif user_input:
+    elif user_input:
             # Add user input to chat history
             st.session_state.messages.append({"role": "user", "content": user_input})
             
