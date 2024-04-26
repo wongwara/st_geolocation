@@ -107,18 +107,24 @@ def main():
             st.experimental_rerun()  # Re-run to update the menu choice
 
     # Check if a menu item is selected and ask for the user input
-    if st.session_state.menu_choice:
-        if not st.session_state.showSelect:
-            with st.chat_message("assistant"):
-                st.markdown(f"OK You selected {st.session_state.menu_choice}")
-                if st.session_state.menu_choice == "Pharmacy Location":
-                    st.markdown("for the Pharmacy Location - Please enter your address:")
-                else:
-                    st.markdown("Please wait for the update version in the future.")
+        user_input = None
+        if st.session_state.menu_choice is not None and st.session_state.showSelect is False:
+            response = f'Ask about {st.session_state.menu_choice}'
+        # with st.chat_message("assistant"):   
+        #   st.markdown(response)
+        if st.session_state.menu_choice == 'Diagnosis':
+            txt = "Please provide your age and gender in the following format: [age] [gender]\nFor example: 30 male\n\nNote: Ages below 12 and over 130 are not supported.\n"
+            response = txt
+        elif st.session_state.menu_choice == 'Pharmacy Location':
+            txt = "Please enter your address:"
+            response = txt
+        with st.chat_message("assistant"):   
+            st.markdown(response)
             st.session_state.showSelect = True
-
+            st.session_state.messages.append({"role": "assistant", "content": response})
+        if st.session_state.menu_choice is not None:
         # Get user input
-        user_input = st.chat_input("What's up? You can type 'quit' to restart.")
+            user_input = st.chat_input("What's up? You can type 'quit' to restart.")
 
         if user_input:
 
