@@ -149,36 +149,34 @@ def main():
                     # Find the nearest pharmacies
                     nearest_pharmacies = find_nearest_pharmacies((user_location), yellow_pages, top_n=10)
 
-                    # Set a threshold for the maximum distance in km
+                    # Set a maximum distance in km
                     max_distance_km = 10.0
 
-                    # Filter out pharmacies that are farther than the specified distance
+                    #  Filter pharmacies by the maximum distance
                     filtered_pharmacies = [
-                        (pharmacy, distance)
-                        for pharmacy, distance in nearest_pharmacies
-                        if distance <= max_distance_km
-                    ]
+                    (pharmacy, distance) for pharmacy, distance in nearest_pharmacies if distance <= max_distance_km
+                     ]
 
-                if filtered_pharmacies:
-                    response = "Here's the map with the nearest pharmacies and their distances."
-        
-                    # Create the map with filtered pharmacies
-                    map_object = create_pharmacy_map(user_location, filtered_pharmacies)
-                    folium_static(map_object)
+                    if filtered_pharmacies:
+                        response = "Here's the map with the nearest pharmacies and their distances."
 
-                # Display the nearest pharmacies in a table
-                nearest_pharmacies_df = pd.DataFrame(
-                    [
+                        # Create the map with filtered pharmacies
+                        map_object = create_pharmacy_map(user_location, filtered_pharmacies)
+                        folium_static(map_object)
+
+                        # Display the filtered pharmacies in a table
+                        nearest_pharmacies_df = pd.DataFrame(
+                        [
                         (pharmacy['pharmacy_name'], f"{distance:.2f} km")
-                        for pharmacy, distance in filtered_pharmacies
-                    ],
-                    columns=['Pharmacy Name', 'Distance (km)']
-                )
-                st.subheader("Nearest Pharmacies within 10 km:")
-                st.table(nearest_pharmacies_df)
-            else:
-                st.error("No pharmacies found within 10 km of your location.")
-                response = "No pharmacies found within 10 km of your location."
+                            for pharmacy, distance in filtered_pharmacies
+                            ],
+                            columns=['Pharmacy Name', 'Distance (km)']
+                        )
+                    st.subheader("Nearest Pharmacies within 10 km:")
+                    st.table(nearest_pharmacies_df)
+                else:
+                    st.error("No pharmacies found within 10 km of your location.")
+                    response = "No pharmacies found within 10 km of your location."
         else:
             st.warning("Address not found. Please check and try again.")
             response = "Address not found. Please try again."
@@ -197,3 +195,4 @@ def main():
 # Run the Streamlit app
 if __name__ == "__main__":
     main()
+
