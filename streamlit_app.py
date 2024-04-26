@@ -7,6 +7,7 @@ from folium.plugins import MarkerCluster
 from streamlit_folium import folium_static
 from streamlit_chat import message  # For chatbot-like interaction
 
+chat_history = []
 
 # Load your pharmacy data
 yellow_pages = pd.read_csv('yellow_pages_pharmacy_df.csv')
@@ -148,34 +149,50 @@ def main():
                     # Find the nearest pharmacies
                     nearest_pharmacies = find_nearest_pharmacies((user_location), yellow_pages, top_n=10)
 
-                    if nearest_pharmacies:
-                        # Create the map with nearest pharmacies
-                        map_object = create_pharmacy_map(user_location, nearest_pharmacies)
-                        folium_static(map_object)
+                    # Set a threshold for the maximum distance in km
+                    max_distance_km = 10.0
 
-                        # Display the top 10 nearest pharmacies in a table
-                        nearest_pharmacies_df = pd.DataFrame(
-                            [(pharmacy['pharmacy_name'], f"{distance:.2f} km") for pharmacy, distance in nearest_pharmacies],
-                            columns=['Pharmacy Name', 'Distance (km)']
-                        )
-                        with st.chat_message("assistant"):
-                            st.markdown("Top 10 Nearest Pharmacies:")
-                            st.table(nearest_pharmacies_df)
+                    # Filter out pharmacies that are farther than the specified distance
+                    filtered_pharmacies = [
+                        (pharmacy, distance)
+                        for pharmacy, distance in nearest_pharmacies
+                        if distance <= max_distance_km
+                    ]
 
-                        # Add the response to the chat history
-                        st.session_state.messages.append(
-                            {"role": "assistant", "content": "Here's the map with the nearest pharmacies and their distances."}
-                        )
-                    else:
-                        st.error("No pharmacies found near your location.")
-                        st.session_state.messages.append(
-                            {"role": "assistant", "content": "No pharmacies found near your location."}
-                        )
-                else:
-                    st.warning("Address not found. Please check and try again.")
-                    st.session_state.messages.append(
-                            {"role": "assistant", "content": "Address not found. Please try again."}
-                    )
+                if filtered_pharmacies:
+                    response = "Here's the map with the nearest pharmacies and their distances."
+        
+                    # Create the map with filtered pharmacies
+                    map_object = create_pharmacy_map(user_location, filtered_pharmacies)
+                    folium_static(map_object)
+
+                # Display the nearest pharmacies in a table
+                nearest_pharmacies_df = pd.DataFrame(
+                    [
+                        (pharmacy['pharmacy_name'], f"{distance:.2f} km")
+                        for pharmacy, distance in filtered_pharmacies
+                    ],
+                    columns=['Pharmacy Name', 'Distance (km)']
+                )
+                st.subheader("Nearest Pharmacies within 10 km:")
+                st.table(nearest_pharmacies_df)
+            else:
+                st.error("No pharmacies found within 10 km of your location.")
+                response = "No pharmacies found within 10 km of your location."
+        else:
+            st.warning("Address not found. Please check and try again.")
+            response = "Address not found. Please try again."
+            # Display bot response in chat message container
+            with st.chat_message("assistant"):
+                st.markdown(response)
+        
+            # Add user input and bot response to chat history
+            st.session_state.messages.append({"role": "user", "content": user_input})
+            st.session_state.messages.append({"role": "assistant", "content": response})
+        
+            chat_history.append({"role": "user", "content": user_input})
+            chat_history.append({"role": "assistant", "content": response})
+            print(chat_history)
 
 # Run the Streamlit app
 if __name__ == "__main__":
